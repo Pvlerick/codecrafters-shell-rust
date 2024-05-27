@@ -20,6 +20,13 @@ fn main() {
         match command {
             "exit" => exit(0),
             "echo" => println!("{}", args.join(" ")),
+            "type" => {
+                let arg0 = args[0];
+                match arg0 {
+                    "exit" | "echo" | "type" => println!("{} is a shell builtin", arg0),
+                    _ => println!("{} not found", arg0),
+                }
+            }
             _ => eprintln!("{}: command not found", command),
         }
     }
