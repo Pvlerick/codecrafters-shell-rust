@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process::exit;
 
 fn main() {
     let stdin = io::stdin();
@@ -12,8 +13,13 @@ fn main() {
         input.clear();
         stdin.read_line(&mut input).unwrap();
 
-        if let Some(command) = input.split_whitespace().collect::<Vec<_>>().first() {
-            eprintln!("{}: command not found", command);
+        match input.as_str() {
+            "exit 0\n" => exit(0),
+            _ => {
+                if let Some(command) = input.split_whitespace().collect::<Vec<_>>().first() {
+                    eprintln!("{}: command not found", command);
+                }
+            }
         }
     }
 }
