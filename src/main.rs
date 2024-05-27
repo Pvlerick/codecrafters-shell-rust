@@ -48,7 +48,7 @@ fn r#type(args: &[&str]) {
     match buildtin(arg0) {
         Some(_) => println!("{} is a shell builtin", arg0),
         _ => {
-            let paths = env::var("PATHZ")
+            let paths = env::var("PATH")
                 .map(|i| i.leak())
                 .map_or(vec![], |i| i.split(":").collect());
 
