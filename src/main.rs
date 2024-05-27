@@ -1,6 +1,7 @@
 #[allow(unused_imports)]
 use std::ops::Deref;
 use std::{
+    env, fs,
     io::{self, Write},
     process,
 };
@@ -46,7 +47,27 @@ fn r#type(args: &[&str]) {
 
     match buildtin(arg0) {
         Some(_) => println!("{} is a shell builtin", arg0),
-        _ => println!("{} not found", arg0),
+        _ => {
+            let paths = env::var("PATHZ")
+                .map(|i| i.leak())
+                .map_or(vec![], |i| i.split(":").collect());
+
+            let mut found = false;
+            'outer: for path in paths {
+                for file in fs::read_dir(path).unwrap() {
+                    let file = file.unwrap();
+                    if file.file_name() == arg0 {
+                        println!("{} is {}", arg0, file.path().display());
+                        found = true;
+                        break 'outer;
+                    }
+                }
+            }
+
+            if !found {
+                println!("{} not found", arg0);
+            }
+        }
     }
 }
 
