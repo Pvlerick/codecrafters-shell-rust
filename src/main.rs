@@ -3,7 +3,7 @@ use std::ops::Deref;
 use std::{
     env, fs,
     io::{self, Write},
-    path::{self, Path, PathBuf},
+    path::{Path, PathBuf},
     process::{self, Command, Stdio},
 };
 
