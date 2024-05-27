@@ -3,7 +3,7 @@ use std::ops::Deref;
 use std::{
     env, fs,
     io::{self, Write},
-    path::{Path, PathBuf},
+    path::{self, Path, PathBuf},
     process::{self, Command, Stdio},
 };
 
@@ -30,9 +30,14 @@ fn main() {
         {
             handler(args);
         } else {
-            match search_command_in_path(command) {
-                Some(path) => exec(&path, args),
-                _ => eprintln!("{}: command not found", command),
+            let path = Path::new(command);
+            if path.exists() {
+                exec(path, args);
+            } else {
+                match search_command_in_path(command) {
+                    Some(path) => exec(&path, args),
+                    _ => eprintln!("{}: command not found", command),
+                }
             }
         }
     }
