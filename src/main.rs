@@ -1,6 +1,6 @@
-#[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process::exit;
+#[allow(unused_imports)]
+use std::{ops::Deref, process::exit};
 
 fn main() {
     let stdin = io::stdin();
@@ -13,13 +13,14 @@ fn main() {
         input.clear();
         stdin.read_line(&mut input).unwrap();
 
-        match input.as_str() {
-            "exit 0\n" => exit(0),
-            _ => {
-                if let Some(command) = input.split_whitespace().collect::<Vec<_>>().first() {
-                    eprintln!("{}: command not found", command);
-                }
-            }
+        let input = input.split_whitespace().collect::<Vec<_>>();
+        let command = input[0];
+        let args = &input[1..];
+
+        match command {
+            "exit" => exit(0),
+            "echo" => println!("{}", args.join(" ")),
+            _ => eprintln!("{}: command not found", command),
         }
     }
 }
