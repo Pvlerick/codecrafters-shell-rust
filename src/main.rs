@@ -9,6 +9,7 @@ fn main() {
         print!("$ ");
         io::stdout().flush().unwrap();
 
+        input.clear();
         stdin.read_line(&mut input).unwrap();
 
         if let Some(command) = input.split_whitespace().collect::<Vec<_>>().first() {
