@@ -1,6 +1,11 @@
-use std::io::{self, Write};
 #[allow(unused_imports)]
-use std::{ops::Deref, process::exit};
+use std::ops::Deref;
+use std::{
+    io::{self, Write},
+    process,
+};
+
+static BUILTINS: &[(&str, fn(&[&str]))] = &[("echo", echo), ("exit", exit), ("type", r#type)];
 
 fn main() {
     let stdin = io::stdin();
@@ -17,17 +22,37 @@ fn main() {
         let command = input[0];
         let args = &input[1..];
 
-        match command {
-            "exit" => exit(0),
-            "echo" => println!("{}", args.join(" ")),
-            "type" => {
-                let arg0 = args[0];
-                match arg0 {
-                    "exit" | "echo" | "type" => println!("{} is a shell builtin", arg0),
-                    _ => println!("{} not found", arg0),
-                }
-            }
-            _ => eprintln!("{}: command not found", command),
+        if let Ok(handler) = BUILTINS
+            .binary_search_by(|(k, _)| k.cmp(&command))
+            .map(|i| BUILTINS[i].1)
+        {
+            handler(args);
+        } else {
+            eprintln!("{}: command not found", command);
         }
     }
+}
+
+fn exit(_: &[&str]) {
+    process::exit(0);
+}
+
+fn echo(args: &[&str]) {
+    println!("{}", args.join(" "));
+}
+
+fn r#type(args: &[&str]) {
+    let arg0 = args[0];
+
+    match buildtin(arg0) {
+        Some(_) => println!("{} is a shell builtin", arg0),
+        _ => println!("{} not found", arg0),
+    }
+}
+
+fn buildtin(command: &str) -> Option<fn(&[&str])> {
+    BUILTINS
+        .binary_search_by(|(k, _)| k.cmp(&command))
+        .map(|i| BUILTINS[i].1)
+        .ok()
 }
