@@ -2,7 +2,7 @@
 use std::ops::Deref;
 use std::{
     env, fs,
-    io::{self, Stdin, Write},
+    io::{self, Write},
     path::{Path, PathBuf},
     process::{self, Command, Stdio},
 };
