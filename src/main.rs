@@ -40,7 +40,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             .map(|i| BUILTINS[i].1)
         {
             match handler(args) {
-                Err(e) => eprintln!("{}", e),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    io::stderr().flush()?;
+                }
                 _ => {}
             }
         } else {
@@ -50,7 +53,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             } else {
                 match search_command_in_path(command) {
                     Some(path) => exec(&path, args),
-                    _ => eprintln!("{}: command not found", command),
+                    _ => {
+                        eprintln!("{}: command not found", command);
+                        io::stderr().flush()?;
+                    }
                 }
             }
         }
@@ -91,7 +97,7 @@ fn cd(args: &[&str]) -> Result<(), Box<dyn Error>> {
     let res = PathBuf::from_str(args[0]);
     match res {
         Ok(path) if path.exists() => env::set_current_dir(path)?,
-        _ => return Err(format!("cd: {}: No such file or directory\\\n", args[0]).into()),
+        _ => return Err(format!("cd: {}: No such file or directory", args[0]).into()),
     };
 
     Ok(())
