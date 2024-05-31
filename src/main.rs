@@ -100,7 +100,7 @@ fn cd(args: &[&str]) -> Result<(), Box<dyn Error>> {
     let res = PathBuf::from_str(args[0]);
     match res {
         Ok(path) if path.exists() => env::set_current_dir(path)?,
-        _ => return Err(format!("cd: {}: No such file or directory", args[0]).into()),
+        _ => return Err(format!("{}: No such file or directory", args[0]).into()),
     };
 
     Ok(())
