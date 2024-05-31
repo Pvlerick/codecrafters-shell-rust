@@ -26,7 +26,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         print!("$ ");
-        io::stdout().flush()?;
 
         input.clear();
         stdin.read_line(&mut input)?;
@@ -54,6 +53,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
         }
+
+        io::stdout().flush()?;
     }
 }
 
