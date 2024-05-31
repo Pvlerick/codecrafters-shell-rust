@@ -8,8 +8,6 @@ use std::{
     path::{Path, PathBuf},
     process::{self, Command, Stdio},
     str::FromStr,
-    thread,
-    time::Duration,
 };
 
 // Must be sorted alphabetically
@@ -42,11 +40,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             .map(|i| BUILTINS[i].1)
         {
             match handler(args) {
-                Err(e) => {
-                    println!("{}", e);
-                    io::stdout().flush()?;
-                    thread::sleep(Duration::from_millis(100));
-                }
+                Err(e) => eprintln!("{}", e),
+
                 _ => {}
             }
         } else {
@@ -56,10 +51,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             } else {
                 match search_command_in_path(command) {
                     Some(path) => exec(&path, args),
-                    _ => {
-                        println!("{}: command not found", command);
-                        io::stdout().flush()?;
-                    }
+                    _ => eprintln!("{}: command not found", command),
                 }
             }
         }
@@ -96,10 +88,15 @@ fn pwd(_: &[&str]) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[allow(deprecated)]
 fn cd(args: &[&str]) -> Result<(), Box<dyn Error>> {
-    let res = PathBuf::from_str(args[0]);
-    match res {
-        Ok(path) if path.exists() => env::set_current_dir(path)?,
+    let path = match args[0] {
+        "~" => env::home_dir(),
+        _ => PathBuf::from_str(args[0]).ok(),
+    };
+
+    match path {
+        Some(path) if path.exists() => env::set_current_dir(path)?,
         _ => return Err(format!("{}: No such file or directory", args[0]).into()),
     };
 
