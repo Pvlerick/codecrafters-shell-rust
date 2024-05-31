@@ -84,7 +84,7 @@ fn cd(args: &[&str], pwd: &mut PathBuf) {
     let res = PathBuf::from_str(args[0]);
     match res {
         Ok(path) if path.exists() => pwd.push(path),
-        Ok(path) => eprintln!("cd: {}: No such file or directory", path.display()),
+        Ok(path) => println!("cd: {}: No such file or directory", path.display()),
         _ => {}
     }
 }
