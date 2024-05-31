@@ -7,7 +7,13 @@ use std::{
     process::{self, Command, Stdio},
 };
 
-static BUILTINS: &[(&str, fn(&[&str]))] = &[("echo", echo), ("exit", exit), ("type", r#type)];
+static BUILTINS: &[(&str, fn(&[&str]))] = &[
+    ("echo", echo),
+    ("exit", exit),
+    ("bye", exit),
+    ("type", r#type),
+    ("pwd", pwd),
+];
 
 fn main() {
     let stdin = io::stdin();
@@ -61,6 +67,10 @@ fn r#type(args: &[&str]) {
             _ => println!("{} not found", arg0),
         },
     }
+}
+
+fn pwd(_: &[&str]) {
+    println!("{}", env::current_dir().unwrap().display());
 }
 
 fn buildtin(command: &str) -> Option<fn(&[&str])> {
