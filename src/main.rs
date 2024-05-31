@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             .map(|i| BUILTINS[i].1)
         {
             match handler(args) {
-                Err(e) => println!("{}", e),
+                Err(e) => eprintln!("{}", e),
                 _ => {}
             }
         } else {
@@ -91,7 +91,7 @@ fn cd(args: &[&str]) -> Result<(), Box<dyn Error>> {
     let res = PathBuf::from_str(args[0]);
     match res {
         Ok(path) if path.exists() => env::set_current_dir(path)?,
-        _ => return Err(format!("cd: {}: No such file or directory", args[0]).into()),
+        _ => return Err(format!("cd: {}: No such file or directory\\", args[0]).into()),
     };
 
     Ok(())
