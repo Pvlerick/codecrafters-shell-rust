@@ -1,31 +1,37 @@
 #[allow(unused_imports)]
 use std::ops::Deref;
 use std::{
-    env, fs,
+    env,
+    error::Error,
+    fs,
     io::{self, Write},
     path::{Path, PathBuf},
     process::{self, Command, Stdio},
+    str::FromStr,
 };
 
 // Must be sorted alphabetically
-static BUILTINS: &[(&str, fn(&[&str]))] = &[
+static BUILTINS: &[(&str, fn(&[&str], &mut PathBuf))] = &[
     ("bye", exit),
+    ("cd", cd),
     ("echo", echo),
     ("exit", exit),
     ("pwd", pwd),
     ("type", r#type),
 ];
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let stdin = io::stdin();
     let mut input = String::new();
 
+    let mut pwd: PathBuf = env::current_dir()?;
+
     loop {
         print!("$ ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush()?;
 
         input.clear();
-        stdin.read_line(&mut input).unwrap();
+        stdin.read_line(&mut input)?;
 
         let input = input.split_whitespace().collect::<Vec<_>>();
         let command = input[0];
@@ -35,7 +41,7 @@ fn main() {
             .binary_search_by(|(k, _)| k.cmp(&command))
             .map(|i| BUILTINS[i].1)
         {
-            handler(args);
+            handler(args, &mut pwd);
         } else {
             let path = Path::new(command);
             if path.exists() {
@@ -50,15 +56,15 @@ fn main() {
     }
 }
 
-fn exit(_: &[&str]) {
+fn exit(_: &[&str], _pwd: &mut PathBuf) {
     process::exit(0);
 }
 
-fn echo(args: &[&str]) {
+fn echo(args: &[&str], _pwd: &mut PathBuf) {
     println!("{}", args.join(" "));
 }
 
-fn r#type(args: &[&str]) {
+fn r#type(args: &[&str], _pwd: &mut PathBuf) {
     let arg0 = args[0];
 
     match buildtin(arg0) {
@@ -70,11 +76,19 @@ fn r#type(args: &[&str]) {
     }
 }
 
-fn pwd(_: &[&str]) {
-    println!("{}", env::current_dir().unwrap().display());
+fn pwd(_: &[&str], pwd: &mut PathBuf) {
+    println!("{}", pwd.display());
 }
 
-fn buildtin(command: &str) -> Option<fn(&[&str])> {
+fn cd(args: &[&str], pwd: &mut PathBuf) {
+    let res = PathBuf::from_str(args[0]);
+    match res {
+        Ok(path) => pwd.push(path),
+        _ => {}
+    }
+}
+
+fn buildtin(command: &str) -> Option<fn(&[&str], &mut PathBuf)> {
     BUILTINS
         .binary_search_by(|(k, _)| k.cmp(&command))
         .map(|i| BUILTINS[i].1)
