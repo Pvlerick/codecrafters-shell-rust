@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             .map(|i| BUILTINS[i].1)
         {
             match handler(args) {
-                Err(e) => eprintln!("{}", e),
+                Err(e) => println!("{}", e),
                 _ => {}
             }
         } else {
@@ -54,8 +54,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
         }
-
-        io::stdout().flush()?;
     }
 }
 
