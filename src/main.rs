@@ -40,7 +40,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             .map(|i| BUILTINS[i].1)
         {
             match handler(args) {
-                Err(e) => eprintln!("{}", e),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    process::exit(1);
+                }
                 _ => {}
             }
         } else {
