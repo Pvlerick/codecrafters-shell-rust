@@ -43,8 +43,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         {
             match handler(args) {
                 Err(e) => {
-                    eprintln!("{}", e);
-                    io::stderr().flush()?;
+                    println!("{}", e);
+                    io::stdout().flush()?;
                     thread::sleep(Duration::from_millis(100));
                 }
                 _ => {}
@@ -57,8 +57,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 match search_command_in_path(command) {
                     Some(path) => exec(&path, args),
                     _ => {
-                        eprintln!("{}: command not found", command);
-                        io::stderr().flush()?;
+                        println!("{}: command not found", command);
+                        io::stdout().flush()?;
                     }
                 }
             }
