@@ -7,12 +7,13 @@ use std::{
     process::{self, Command, Stdio},
 };
 
+// Must be sorted alphabetically
 static BUILTINS: &[(&str, fn(&[&str]))] = &[
+    ("bye", exit),
     ("echo", echo),
     ("exit", exit),
-    ("bye", exit),
-    ("type", r#type),
     ("pwd", pwd),
+    ("type", r#type),
 ];
 
 fn main() {
@@ -86,11 +87,16 @@ fn search_command_in_path(command: &str) -> Option<PathBuf> {
         .map_or(vec![], |i| i.split(":").collect());
 
     for path in paths {
-        for file in fs::read_dir(path).unwrap() {
-            let file = file.unwrap();
-            if file.file_name() == command {
-                return Some(file.path());
+        match fs::read_dir(path) {
+            Ok(dir) => {
+                for file in dir {
+                    let file = file.unwrap();
+                    if file.file_name() == command {
+                        return Some(file.path());
+                    }
+                }
             }
+            Err(_) => {} //TODO Handle non "Permission denied" error
         }
     }
 
