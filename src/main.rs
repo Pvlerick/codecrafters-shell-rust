@@ -11,7 +11,7 @@ use std::{
 };
 
 // Must be sorted alphabetically
-static BUILTINS: &[(&str, fn(&[&str], &mut PathBuf))] = &[
+static BUILTINS: &[(&str, fn(&[&str]) -> Result<(), Box<dyn Error>>)] = &[
     ("bye", exit),
     ("cd", cd),
     ("echo", echo),
@@ -23,8 +23,6 @@ static BUILTINS: &[(&str, fn(&[&str], &mut PathBuf))] = &[
 fn main() -> Result<(), Box<dyn Error>> {
     let stdin = io::stdin();
     let mut input = String::new();
-
-    let mut pwd: PathBuf = env::current_dir()?;
 
     loop {
         print!("$ ");
@@ -41,7 +39,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             .binary_search_by(|(k, _)| k.cmp(&command))
             .map(|i| BUILTINS[i].1)
         {
-            handler(args, &mut pwd);
+            match handler(args) {
+                Err(e) => eprintln!("{}", e),
+                _ => {}
+            }
         } else {
             let path = Path::new(command);
             if path.exists() {
@@ -56,15 +57,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn exit(_: &[&str], _pwd: &mut PathBuf) {
+fn exit(_: &[&str]) -> Result<(), Box<dyn Error>> {
     process::exit(0);
 }
 
-fn echo(args: &[&str], _pwd: &mut PathBuf) {
+fn echo(args: &[&str]) -> Result<(), Box<dyn Error>> {
     println!("{}", args.join(" "));
+
+    Ok(())
 }
 
-fn r#type(args: &[&str], _pwd: &mut PathBuf) {
+fn r#type(args: &[&str]) -> Result<(), Box<dyn Error>> {
     let arg0 = args[0];
 
     match buildtin(arg0) {
@@ -74,22 +77,27 @@ fn r#type(args: &[&str], _pwd: &mut PathBuf) {
             _ => println!("{} not found", arg0),
         },
     }
+
+    Ok(())
 }
 
-fn pwd(_: &[&str], pwd: &mut PathBuf) {
-    println!("{}", pwd.display());
+fn pwd(_: &[&str]) -> Result<(), Box<dyn Error>> {
+    println!("{}", env::current_dir()?.display());
+
+    Ok(())
 }
 
-fn cd(args: &[&str], pwd: &mut PathBuf) {
+fn cd(args: &[&str]) -> Result<(), Box<dyn Error>> {
     let res = PathBuf::from_str(args[0]);
     match res {
-        Ok(path) if path.exists() => pwd.push(path),
-        Ok(path) => println!("cd: {}: No such file or directory", path.display()),
-        _ => {}
-    }
+        Ok(path) if path.exists() => env::set_current_dir(path)?,
+        _ => return Err(format!("cd: {}: no such file or directory", args[0]).into()),
+    };
+
+    Ok(())
 }
 
-fn buildtin(command: &str) -> Option<fn(&[&str], &mut PathBuf)> {
+fn buildtin(command: &str) -> Option<fn(&[&str]) -> Result<(), Box<dyn Error>>> {
     BUILTINS
         .binary_search_by(|(k, _)| k.cmp(&command))
         .map(|i| BUILTINS[i].1)
