@@ -8,6 +8,8 @@ use std::{
     path::{Path, PathBuf},
     process::{self, Command, Stdio},
     str::FromStr,
+    thread,
+    time::Duration,
 };
 
 // Must be sorted alphabetically
@@ -43,6 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Err(e) => {
                     eprintln!("{}", e);
                     io::stderr().flush()?;
+                    thread::sleep(Duration::from_millis(100));
                 }
                 _ => {}
             }
